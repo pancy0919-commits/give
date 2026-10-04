@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>媽媽的專屬集卡冊</title>
+    <style>
+        body {
+            background: #fdf6e2;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #264653;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        p.subtitle {
+            color: #e76f51;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* 抽卡區塊 */
+        .gacha-box {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        .gift-btn {
+            font-size: 60px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 15px 0;
+        }
+        .gift-btn:hover {
+            transform: scale(1.15);
+        }
+
+        /* 抽出的卡片跳出來的樣式 */
+        #card-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 10px;
+            border: 2px dashed #2a9d8f;
+            display: none;
+        }
+        #card-result h3 {
+            margin: 0 0 5px 0;
+            color: #2a9d8f;
+        }
+        #card-result p {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        /* 集卡冊區塊 */
+        .collection-panel {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        .collection-title {
+            font-size: 18px;
+            color: #264653;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .slot {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            border: 1px solid #ddd;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 收集到的卡片樣式 */
+        .slot.unlocked {
+            background: #fff3e6;
+            color: #d62828;
+            border-color: #f4a261;
+            font-weight: bold;
+        }
+
+        /* 全收集通關訊息 */
+        #congrats {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 8px;
+            text-align: font-weight;
+            font-weight: bold;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎁 媽媽的驚喜禮物盲盒</h1>
+    <p class="subtitle">點擊禮物盒，收集所有感謝卡片！</p>
+
+    <!-- 抽卡區 -->
+    <div class="gacha-box">
+        <button class="gift-btn" onclick="drawCard()">🎁</button>
+        <div style="font-size: 14px; color: #666;">點擊禮物抽卡片</div>
+        
+        <div id="card-result">
+            <h3 id="result-title">抽到新卡片！</h3>
+            <p id="result-text">卡片內容</p>
+        </div>
+    </div>
+
+    <!-- 集卡冊區 -->
+    <div class="collection-panel">
+        <div class="collection-title">
+            <span>我的集卡冊</span>
+            <span id="counter">0 / 6</span>
+        </div>
+        <div class="card-grid" id="grid">
+            <!-- 6張卡片的格子 -->
+            <div class="slot" id="slot-0">🔒 未解鎖</div>
+            <div class="slot" id="slot-1">🔒 未解鎖</div>
+            <div class="slot" id="slot-2">🔒 未解鎖</div>
+            <div class="slot" id="slot-3">🔒 未解鎖</div>
+            <div class="slot" id="slot-4">🔒 未解鎖</div>
+            <div class="slot" id="slot-5">🔒 未解鎖</div>
+        </div>
+        <div id="congrats">🎉 太棒了！集齊所有卡片！媽媽獲得了「永遠幸福快樂」終極大獎！❤️</div>
+    </div>
+
+    <script>
+        // 定義 6 張不同的卡片內容
+        const cards = [
+            { id: 0, title: "卡片 1：超級大後盾", text: "謝謝你總是支持我的各種奇思妙想！" },
+            { id: 1, title: "卡片 2：美味料理", text: "最喜歡吃媽媽煮的好料與點心了！" },
+            { id: 2, title: "卡片 3：溫暖陪伴", text: "有你在家裡，每天都充滿歡笑！" },
+            { id: 3, title: "卡片 4：最強律師（或超強管家）", text: "不管是大小事你都能完美搞定！" },
+            { id: 4, title: "卡片 5：專屬密碼 131313", text: "解開 MMM 的秘密，代表永遠愛你！" },
+            { id: 5, title: "卡片 6：終極大獎", text: "祝親愛的媽媽每一天都開心健康！" }
+        ];
+
+        // 記錄哪些卡片已經收集到了
+        let collected = [false, false, false, false, false, false];
+
+        function drawCard() {
+            // 隨機抽一張卡片 (0到5)
+            const randomIndex = Math.floor(Math.random() * cards.length);
+            const drawn = cards[randomIndex];
+
+            // 顯示抽到的結果
+            const resultBox = document.getElementById('card-result');
+            document.getElementById('result-title').innerText = "✨ " + drawn.title;
+            document.getElementById('result-text').innerText = drawn.text;
+            resultBox.style.display = 'block';
+
+            // 如果還沒收集過這張，就解鎖它
+            if (!collected[randomIndex]) {
+                collected[randomIndex] = true;
+                
+                // 更新集卡冊格子畫面
+                const slot = document.getElementById('slot-' + randomIndex);
+                slot.innerText = drawn.title.split('：')[0]; // 顯示卡片簡稱
+                slot.classList.add('unlocked');
+
+                // 更新計數器
+                updateCounter();
+            }
+        }
+
+        function updateCounter() {
+            const count = collected.filter(Boolean).length;
+            document.getElementById('counter').innerText = count + " / 6";
+
+            // 如果全部收集完畢，顯示通關祝賀
+            if (count === cards.length) {
+                document.getElementById('congrats').style.display = 'block';
+            }
+        }
+    </script>
+
+</body>
+</html>
